@@ -1,6 +1,18 @@
-# rust-new-project-template
-A good starting point for a new Rust project
+# User Profile Microservice
+This is a web microservice that manage user profile. It allows user to store, view and update their personal information. 
+
+## Language
+Rust
+
+## Web structure
+Actix
+
+## Developer guide
+
+
+## Workflow
+Week 1: basic structure
 
 ## References
-
-* [rust-cli-template](https://github.com/kbknapp/rust-cli-template)
+* [rust-new-project-template](https://github.com/nogibjj/rust-new-project-template)
+* [rust-actix-example](https://github.com/nogibjj/hello-rust-template-example)
