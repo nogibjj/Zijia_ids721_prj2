@@ -8,10 +8,13 @@ Rust
 Actix
 
 ## Developer guide
+`cargo run`
 
 
 ## Workflow
 Week 1: basic structure
+
+Week 2: add front-end page and make connection
 
 ## References
 * [rust-new-project-template](https://github.com/nogibjj/rust-new-project-template)
