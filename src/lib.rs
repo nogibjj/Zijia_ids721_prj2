@@ -1,8 +1,8 @@
-use std::{fs::File, fs::OpenOptions, io::Write};
+use std::{fs::File, fs::OpenOptions, io::BufReader, io::Write};
 
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, web, HttpResponse, Responder};
 
-use csv::Reader;
+use csv::{ReaderBuilder, StringRecord};
 
 #[derive(serde::Deserialize)]
 pub struct User {
@@ -62,31 +62,42 @@ async fn search() -> impl Responder {
         .body(include_str!("../templates/search.html"))
 }
 
+// this function takes a name, searches the ./database.csv file for the name and returns the record in this csv file
+fn search_file(name: &str) -> Option<String> {
+    let file = File::open("./database.csv").ok()?;
+    let reader = BufReader::new(file);
+    let mut csv_reader = ReaderBuilder::new().has_headers(true).from_reader(reader);
+
+    for result in csv_reader.records() {
+        let record: StringRecord = result.ok()?;
+        if let Some(n) = record.get(0) {
+            if n == name {
+                let output = format!(
+                    "Name: {}, Email: {}, Telephone: {}",
+                    record.get(0).unwrap_or(""),
+                    record.get(1).unwrap_or(""),
+                    record.get(2).unwrap_or("")
+                );
+                return Some(output);
+            }
+        }
+    }
+
+    None
+}
+
 #[get("/search/{name}")]
 async fn search_name(path: web::Path<String>) -> impl Responder {
     // Extract the tuple from the web::Path struct using into_inner()
     let name = path.into_inner();
 
-    // open the file in read mode
-    let file = File::open("./database.csv").expect("Failed to open file");
-
-    // fine the line whose name matches the name in the path
-    let mut reader = csv::Reader::from_reader(file);
-    for result in reader.records() {
-        let record = result.unwrap();
-        if record.get(0).unwrap() == &name {
-            return HttpResponse::Ok()
-                .content_type("text/html; charset=utf-8")
-                .body(format!(
-                    "Name: {}, Email: {}, Telephone: {}",
-                    record.get(0).unwrap(),
-                    record.get(1).unwrap(),
-                    record.get(2).unwrap()
-                ));
-        }
+    // define a variable to hold the search result
+    let mut search_result = String::new();
+    if let Some(result) = search_file(&name) {
+        search_result = result;
+    } else {
+        search_result = "Record not found".to_string();
     }
 
-    HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
-        .body("No user found")
+    HttpResponse::Ok().body(search_result)
 }
